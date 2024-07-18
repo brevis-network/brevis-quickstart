@@ -6,8 +6,8 @@ import { HardhatUserConfig } from 'hardhat/types';
 
 dotenv.config();
 
-const sepoliaEndpoint = process.env.SEPOLIA_ENDPOINT as string;
-const privateKey = process.env.PRIVATE_KEY as string;
+const sepoliaEndpoint = process.env.SEPOLIA_ENDPOINT || 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
+const privateKey = process.env.PRIVATE_KEY || 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff';
 
 const config: HardhatUserConfig = {
   defaultNetwork: 'hardhat',
