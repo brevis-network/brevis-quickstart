@@ -5,12 +5,12 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "./lib/BrevisAppZkOnly.sol";
 
 // Only accept ZK-attested results.
-contract AccountAgeZkOnly is BrevisZkApp, Ownable {
+contract AccountAgeZkOnly is BrevisAppZkOnly, Ownable {
     event AccountAgeAttested(address account, uint64 blockNum);
 
     bytes32 public vkHash;
 
-    constructor(address _brevisRequest) BrevisZkApp(_brevisRequest) Ownable(msg.sender) {}
+    constructor(address _brevisRequest) BrevisAppZkOnly(_brevisRequest) Ownable(msg.sender) {}
 
     // BrevisRequest contract will trigger callback once ZK proof is received.
     function handleProofResult(bytes32 _vkHash, bytes calldata _circuitOutput) internal override {
