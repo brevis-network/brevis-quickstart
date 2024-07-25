@@ -9,6 +9,7 @@ import (
 
 	"github.com/brevis-network/brevis-quickstart/age"
 	"github.com/brevis-network/brevis-sdk/sdk"
+	"github.com/brevis-network/brevis-sdk/sdk/proto/gwproto"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -78,7 +79,7 @@ func prove() {
 	appContract := common.HexToAddress("0xef1B4B164Fd3b7933bfaDb042373560e715Ec5D6")
 	refundee := common.HexToAddress("0x164Ef8f77e1C88Fb2C724D3755488bE4a3ba4342")
 
-	calldata, requestId, feeValue, err := app.PrepareRequest(vk, 1, 11155111, refundee, appContract)
+	calldata, requestId, _, feeValue, err := app.PrepareRequest(vk, 97, 97, refundee, appContract, 400000, gwproto.QueryOption_ZK_MODE.Enum())
 	check(err)
 	fmt.Printf("calldata %x\n", calldata)
 	fmt.Printf("feeValue %d\n", feeValue)
