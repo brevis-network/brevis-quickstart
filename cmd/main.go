@@ -19,7 +19,7 @@ var mode = flag.String("mode", "", "compile or prove")
 var outDir = flag.String("out", "$HOME/circuitOut/myBrevisApp", "compilation output dir")
 var srsDir = flag.String("srs", "$HOME/kzgsrs", "where to cache kzg srs")
 var txHash = flag.String("tx", "", "tx hash to prove")
-var rpc = flag.String("rpc", "https://gateway.tenderly.co/public/mainnet", "eth json rpc url")
+var rpc = flag.String("rpc", "https://bsc-testnet.public.blastapi.io ", "eth json rpc url")
 
 func main() {
 	flag.Parse()
@@ -48,6 +48,7 @@ func prove() {
 
 	// Loading the previous compile result into memory
 	compiledCircuit, pk, vk, err := sdk.ReadSetupFrom(*outDir)
+	check(err)
 
 	app, err := sdk.NewBrevisApp()
 	check(err)
@@ -76,8 +77,8 @@ func prove() {
 	check(err)
 
 	fmt.Println(">> Initiating Brevis request")
-	appContract := common.HexToAddress("0xef1B4B164Fd3b7933bfaDb042373560e715Ec5D6")
-	refundee := common.HexToAddress("0x164Ef8f77e1C88Fb2C724D3755488bE4a3ba4342")
+	appContract := common.HexToAddress("0xeec66d9b615ff84909be1cb1fe633cc26150417d")
+	refundee := common.HexToAddress("0x1bF81EA1F2F6Afde216cD3210070936401A14Bd4")
 
 	calldata, requestId, _, feeValue, err := app.PrepareRequest(vk, 97, 97, refundee, appContract, 400000, gwproto.QueryOption_ZK_MODE.Enum())
 	check(err)
