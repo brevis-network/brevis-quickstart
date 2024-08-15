@@ -19,7 +19,8 @@ var mode = flag.String("mode", "", "compile or prove")
 var outDir = flag.String("out", "$HOME/circuitOut/myBrevisApp", "compilation output dir")
 var srsDir = flag.String("srs", "$HOME/kzgsrs", "where to cache kzg srs")
 var txHash = flag.String("tx", "", "tx hash to prove")
-var rpc = flag.String("rpc", "https://bsc-testnet.public.blastapi.io ", "eth json rpc url")
+var rpc = flag.String("rpc", "https://bsc-testnet.public.blastapi.io", "eth json rpc url")
+var useBrevisPartnerFlow = flag.Bool("brevis-partner", false, "use brevis partner flow")
 
 func main() {
 	flag.Parse()
@@ -80,11 +81,20 @@ func prove() {
 	appContract := common.HexToAddress("0xeec66d9b615ff84909be1cb1fe633cc26150417d")
 	refundee := common.HexToAddress("0x1bF81EA1F2F6Afde216cD3210070936401A14Bd4")
 
-	calldata, requestId, _, feeValue, err := app.PrepareRequest(vk, 97, 97, refundee, appContract, 400000, gwproto.QueryOption_ZK_MODE.Enum())
-	check(err)
-	fmt.Printf("calldata %x\n", calldata)
-	fmt.Printf("feeValue %d\n", feeValue)
-	fmt.Printf("requestId %s\n", requestId)
+	if *useBrevisPartnerFlow {
+		calldata, requestId, _, feeValue, err := app.PrepareRequest(vk, 97, 97, refundee, appContract, 400000, gwproto.QueryOption_ZK_MODE.Enum(), "TEST_ACCOUNT_AGE_KEY")
+		fmt.Printf("calldata %x\n", calldata)
+		fmt.Printf("feeValue %d\n", feeValue)
+		fmt.Printf("requestId %s\n", requestId)
+		check(err)
+	} else {
+		calldata, requestId, _, feeValue, err := app.PrepareRequest(vk, 97, 97, refundee, appContract, 400000, gwproto.QueryOption_ZK_MODE.Enum(), "")
+		fmt.Printf("calldata %x\n", calldata)
+		fmt.Printf("feeValue %d\n", feeValue)
+		fmt.Printf("requestId %s\n", requestId)
+		fmt.Println("Don't forget to make the transaction that pays the fee by calling Brevis.sendRequest")
+		check(err)
+	}
 
 	// Submit proof to Brevis
 	fmt.Println(">> Submitting my proof to Brevis")
@@ -97,8 +107,6 @@ func prove() {
 	submitTx, err := app.WaitFinalProofSubmitted(context.Background())
 	check(err)
 	fmt.Printf(">> Final proof submitted: tx hash %s\n", submitTx)
-
-	// [Don't forget to make the transaction that pays the fee by calling Brevis.sendRequest]
 }
 
 func queryTransaction(txhash common.Hash) sdk.TransactionData {

@@ -113,8 +113,8 @@ github.com/blang/semver/v4 v4.0.0 h1:1PFHFE6yCCTv8C1TeyNNarDzntLi7wMI5i/pzqYIsAM
 github.com/blang/semver/v4 v4.0.0/go.mod h1:IbckMUScFkM3pff0VJDNKRiT6TG/YpiHIM2yvyW5YoQ=
 github.com/bmizerany/pat v0.0.0-20170815010413-6226ea591a40/go.mod h1:8rLXio+WjiTceGBHIoTvn60HIbs7Hm7bcHjyrSqYB9c=
 github.com/boltdb/bolt v1.3.1/go.mod h1:clJnj/oiGkjum5o1McbSZDSLxVThjynRyGBgiAx27Ps=
-github.com/brevis-network/brevis-sdk v0.0.0-20240729033027-455402d94c42 h1:UTDpCl/AiBsX58RodFKtkZMIV8FRP9/kZNdMGNJebhI=
-github.com/brevis-network/brevis-sdk v0.0.0-20240729033027-455402d94c42/go.mod h1:1fBV5HpUiQOTb7TXr195cIi04rpdKvbPoaArVB64MdI=
+github.com/brevis-network/brevis-sdk v0.0.0-20240815080502-4b0e929daaa1 h1:zZSiNtbm/4Ocmfwc9rRp4zPx1QRkfFpo6El/0aLSlV8=
+github.com/brevis-network/brevis-sdk v0.0.0-20240815080502-4b0e929daaa1/go.mod h1:1fBV5HpUiQOTb7TXr195cIi04rpdKvbPoaArVB64MdI=
 github.com/brevis-network/zk-utils v0.0.0-20240708030032-e860f3d67190 h1:FKcHbJgWOUKpC3WhlkUrTbqflR0FuVdsVrsJYIiIHWM=
 github.com/brevis-network/zk-utils v0.0.0-20240708030032-e860f3d67190/go.mod h1:yCUbhH42LGbP08BC2yg6YrN5frsAKWHr01xjYHuJBM4=
 github.com/btcsuite/btcd/btcec/v2 v2.2.0 h1:fzn1qaOt32TuLjFlkzYSsBC35Q3KUjT1SwPxiMSCF5k=
