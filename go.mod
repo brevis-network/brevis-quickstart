@@ -3,7 +3,7 @@ module github.com/brevis-network/brevis-quickstart
 go 1.21.5
 
 require (
-	github.com/brevis-network/brevis-sdk v0.3.10-0.20241108033403-7eeeed3135c8
+	github.com/brevis-network/brevis-sdk v0.3.10-0.20241108085352-79350ef7a34c
 	github.com/ethereum/go-ethereum v1.14.8
 )
 
@@ -17,7 +17,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bits-and-blooms/bitset v1.10.0 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
-	github.com/brevis-network/zk-hash v0.0.0-20240903111749-fedffbe8a45c // indirect
+	github.com/brevis-network/zk-hash v0.0.0-20241108052253-b7ab3c6a195b // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.4 // indirect
 	github.com/cbergoon/merkletree v0.2.0 // indirect
 	github.com/cespare/cp v1.1.1 // indirect
@@ -51,7 +51,6 @@ require (
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/gorilla/websocket v1.5.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0 // indirect
-	github.com/hashicorp/go-uuid v1.0.1 // indirect
 	github.com/holiman/uint256 v1.3.1 // indirect
 	github.com/iden3/go-iden3-crypto v0.0.15 // indirect
 	github.com/ingonyama-zk/icicle v0.1.1-0.20240120093837-db9eff751859 // indirect
@@ -74,7 +73,6 @@ require (
 	github.com/prometheus/procfs v0.9.0 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.12.0 // indirect
-	github.com/rs/cors v1.7.0 // indirect
 	github.com/rs/zerolog v1.30.0 // indirect
 	github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible // indirect
 	github.com/stretchr/testify v1.9.0 // indirect

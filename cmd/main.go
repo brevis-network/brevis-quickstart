@@ -4,14 +4,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"math/big"
 	"path/filepath"
 
-	"github.com/brevis-network/brevis-quickstart/age"
+	"github.com/brevis-network/brevis-quickstart/circuits"
 	"github.com/brevis-network/brevis-sdk/sdk"
 	"github.com/brevis-network/brevis-sdk/sdk/proto/gwproto"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 )
 
@@ -19,7 +17,7 @@ var mode = flag.String("mode", "", "compile or prove")
 var outDir = flag.String("out", "$HOME/circuitOut/myBrevisApp", "compilation output dir")
 var srsDir = flag.String("srs", "$HOME/kzgsrs", "where to cache kzg srs")
 var txHash = flag.String("tx", "", "tx hash to prove")
-var rpc = flag.String("rpc", "https://bsc-testnet.public.blastapi.io", "eth json rpc url")
+var rpc = flag.String("rpc", "https://eth.llamarpc.com", "eth json rpc url")
 var useBrevisPartnerFlow = flag.Bool("brevis-partner", false, "use brevis partner flow")
 
 func main() {
@@ -35,10 +33,10 @@ func main() {
 }
 
 func compile() {
-	appCircuit := &age.AppCircuit{}
+	appCircuit := &circuits.AppCircuit{}
 	// The compiled circuit, proving key, and verifying key are saved to outDir, and
 	// the downloaded SRS in the process is saved to srsDir
-	_, _, _, err := sdk.Compile(appCircuit, *outDir, *srsDir)
+	_, _, _, _, err := sdk.Compile(appCircuit, *outDir, *srsDir)
 	check(err)
 }
 
@@ -48,19 +46,18 @@ func prove() {
 	}
 
 	// Loading the previous compile result into memory
-	compiledCircuit, pk, vk, err := sdk.ReadSetupFrom(*outDir)
+	compiledCircuit, pk, vk, _, err := sdk.ReadSetupFrom(&circuits.AppCircuit{}, *outDir)
 	check(err)
 
-	app, err := sdk.NewBrevisApp()
+	app, err := sdk.NewBrevisApp(1, *rpc, *outDir)
 	check(err)
 
-	// Query the user specified tx
-	tx := queryTransaction(common.HexToHash(*txHash))
+	sdkReceiptData, err := prepareReceiptData()
+	check(err)
 
-	// Adding the queried tx
-	app.AddTransaction(tx)
+	app.AddReceipt(sdkReceiptData)
 
-	appCircuitAssignment := &age.AppCircuit{}
+	appCircuitAssignment := &circuits.AppCircuit{}
 
 	// Prove
 	fmt.Println(">> Proving the transaction using my circuit")
@@ -78,17 +75,17 @@ func prove() {
 	check(err)
 
 	fmt.Println(">> Initiating Brevis request")
-	appContract := common.HexToAddress("0xeec66d9b615ff84909be1cb1fe633cc26150417d")
+	appContract := common.HexToAddress("0x9fc16c4918a4d69d885f2ea792048f13782a522d")
 	refundee := common.HexToAddress("0x1bF81EA1F2F6Afde216cD3210070936401A14Bd4")
 
 	if *useBrevisPartnerFlow {
-		calldata, requestId, _, feeValue, err := app.PrepareRequest(vk, 97, 97, refundee, appContract, 400000, gwproto.QueryOption_ZK_MODE.Enum(), "TEST_ACCOUNT_AGE_KEY")
+		calldata, requestId, _, feeValue, err := app.PrepareRequest(vk, witness, 1, 11155111, refundee, appContract, 400000, gwproto.QueryOption_ZK_MODE.Enum(), "TestVolume")
 		fmt.Printf("calldata %x\n", calldata)
 		fmt.Printf("feeValue %d\n", feeValue)
 		fmt.Printf("requestId %s\n", requestId)
 		check(err)
 	} else {
-		calldata, requestId, _, feeValue, err := app.PrepareRequest(vk, 97, 97, refundee, appContract, 400000, gwproto.QueryOption_ZK_MODE.Enum(), "")
+		calldata, requestId, _, feeValue, err := app.PrepareRequest(vk, witness, 1, 11155111, refundee, appContract, 400000, gwproto.QueryOption_ZK_MODE.Enum(), "")
 		fmt.Printf("calldata %x\n", calldata)
 		fmt.Printf("feeValue %d\n", feeValue)
 		fmt.Printf("requestId %s\n", requestId)
@@ -109,37 +106,44 @@ func prove() {
 	fmt.Printf(">> Final proof submitted: tx hash %s\n", submitTx)
 }
 
-func queryTransaction(txhash common.Hash) sdk.TransactionData {
+func prepareReceiptData() (sdk.ReceiptData, error) {
 	ec, err := ethclient.Dial(*rpc)
-	check(err)
-	tx, _, err := ec.TransactionByHash(context.Background(), txhash)
-	check(err)
-	receipt, err := ec.TransactionReceipt(context.Background(), txhash)
-	check(err)
-	from, err := types.Sender(types.NewLondonSigner(tx.ChainId()), tx)
-	check(err)
-
-	gtc := big.NewInt(0)
-	gasFeeCap := big.NewInt(0)
-	if tx.Type() == types.LegacyTxType {
-		gtc = tx.GasPrice()
-	} else {
-		gtc = tx.GasTipCap()
-		gasFeeCap = tx.GasFeeCap()
+	if err != nil {
+		return sdk.ReceiptData{}, err
 	}
 
-	return sdk.TransactionData{
-		Hash:                common.HexToHash(*txHash),
-		ChainId:             tx.ChainId(),
-		BlockNum:            receipt.BlockNumber,
-		Nonce:               tx.Nonce(),
-		GasTipCapOrGasPrice: gtc,
-		GasFeeCap:           gasFeeCap,
-		GasLimit:            tx.Gas(),
-		From:                from,
-		To:                  *tx.To(),
-		Value:               tx.Value(),
+	hash := common.HexToHash(*txHash)
+	if hash.Cmp(common.Hash{}) == 0 {
+		return sdk.ReceiptData{}, fmt.Errorf("empty tx hash")
 	}
+
+	receipt, err := ec.TransactionReceipt(context.Background(), hash)
+	if err != nil {
+		return sdk.ReceiptData{}, err
+	}
+
+	for i, log := range receipt.Logs {
+		if log.Address.Cmp(common.HexToAddress("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48")) == 0 &&
+			log.Topics[0].Cmp(common.HexToHash("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef")) == 0 {
+			return sdk.ReceiptData{
+				TxHash: hash,
+				Fields: []sdk.LogFieldData{
+					{
+						IsTopic:    true,
+						LogPos:     uint(i),
+						FieldIndex: 1,
+					},
+					{
+						IsTopic:    false,
+						LogPos:     uint(i),
+						FieldIndex: 0,
+					},
+				},
+			}, nil
+		}
+	}
+
+	return sdk.ReceiptData{}, fmt.Errorf("usdc transfer event not found")
 }
 
 func check(err error) {
