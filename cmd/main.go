@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"math/big"
 	"path/filepath"
 
 	"github.com/brevis-network/brevis-quickstart/circuits"
@@ -123,8 +124,12 @@ func prepareReceiptData() (sdk.ReceiptData, error) {
 	}
 
 	for i, log := range receipt.Logs {
+		if len(log.Data) < 32 {
+			continue
+		}
 		if log.Address.Cmp(common.HexToAddress("0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48")) == 0 &&
-			log.Topics[0].Cmp(common.HexToHash("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef")) == 0 {
+			log.Topics[0].Cmp(common.HexToHash("0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef")) == 0 &&
+			big.NewInt(0).SetBytes(log.Data[0:32]).Cmp(big.NewInt(500000000)) > -1 {
 			return sdk.ReceiptData{
 				TxHash: hash,
 				Fields: []sdk.LogFieldData{
